@@ -1,0 +1,30 @@
+# Go
+go/bin/
+go/coverage.out
+go/coverage.html
+
+# Node (future)
+node/node_modules/
+node/dist/
+
+# Python (future)
+python/.venv/
+python/dist/
+python/__pycache__/
+python/*.egg-info/
+
+# Env
+.env
+.env.local
+
+# Claude personal
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log

@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test-go:
+    name: Test (Go SDK)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./go
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+          cache-dependency-path: ./go/go.sum
+      - name: Build
+        run: go build ./...
+      - name: Run tests
+        run: |
+          if [[ -z "$(find . -name '*_test.go' 2>/dev/null)" ]]; then
+            echo "No tests yet — skipping coverage gate. Add tests as soon as logic lands."
+            exit 0
+          fi
+          go test -race -coverprofile=coverage.out -covermode=atomic ./...
+      - name: Coverage gate (≥95%)
+        if: hashFiles('go/coverage.out') != ''
+        run: |
+          coverage=$(go tool cover -func=coverage.out | tail -1 | awk '{print $3}' | tr -d '%')
+          echo "Coverage: ${coverage}%"
+          awk -v c="$coverage" 'BEGIN { if (c+0 < 95) { print "::error::Coverage "c"% is below the 95% minimum"; exit 1 } }'
+
+  lint-go:
+    name: Lint (Go SDK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+          cache-dependency-path: ./go/go.sum
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./go

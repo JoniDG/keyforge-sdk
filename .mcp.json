@@ -1,0 +1,10 @@
+{
+  "$comment": "MCP servers for keyforge-sdk. Commited so the team shares the same tooling.",
+  "mcpServers": {
+    "context7": {
+      "$comment": "Up-to-date library docs (websocket libs, testify). Avoids API hallucinations.",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
+}
