@@ -15,11 +15,11 @@ Toolkit para devs que quieren escribir **plugins** o **clientes externos** del d
 
 ## Layout
 ```
-docs/                  → spec del protocolo en markdown (handshake, mensajes, lifecycle)
-examples/              → plugins de ejemplo (echo, hello-world)
+docs/                  → vista del protocolo para autores de plugins (resume keyforge-protocol)
+examples/go/<nombre>/  → plugins de ejemplo; cada uno es un módulo Go propio (go.mod con replace a ../../../go) + manifest.json
 go/                    → SDK Go (ACTIVO)
-  client/              → cliente WebSocket helper
-  plugin/              → base de plugin con lifecycle hooks
+  client/              → Dial (hello) + ReadEvent + Close
+  plugin/              → Run: env var, conexión, dispatch y shutdown; el autor solo escribe Handlers
 node/                  → placeholder (TBD)
 python/                → placeholder (TBD)
 ```
@@ -27,7 +27,7 @@ python/                → placeholder (TBD)
 ## Stack
 - Go 1.24 (subdir `go/`).
 - Tipos del protocolo: módulo publicado `github.com/JoniDG/keyforge-protocol/go` (tag `go/vX.Y.Z`; en `go get` va sin el prefijo: `@v0.10.0`). Nunca redefinir tipos del protocolo a mano.
-- WebSocket: `github.com/coder/websocket` (misma lib que `keyforge-core`; API con `context`, y `websocket.Accept` sirve para el server fake de los tests). Ojo: cancelar el ctx de un `Read` cierra la conexión.
+- WebSocket: `github.com/coder/websocket` (misma lib que `keyforge-core`; API con `context`, y `websocket.Accept` sirve para el server fake de los tests). Ojo: cancelar el ctx de un `Read` **bloqueado** corta la conexión sin close frame (el peer ve un cierre anormal); con un ctx ya cancelado de entrada, en cambio, no la cierra. Por eso `plugin` lee con `context.WithoutCancel` y, al cancelar, cierra con `conn.Close()` (close 1000).
 - Tests: `testify`, `mockery`.
 
 ## Comandos
@@ -59,6 +59,14 @@ make lint
 ### Tests (Go)
 - Coverage mínimo 95%.
 - Tests del client deben usar un WS server fake (no levantar el daemon real).
+- `t.Setenv` no se puede usar con `t.Parallel()`: el paquete `plugin` inyecta el lookup de la env var en un `run` interno, y solo un test no paralelo cubre `Run`.
+- Los ejemplos de `examples/go/` llevan test (manifest válido contra `protocol.PluginManifest`, cada action con su handler) y corren en el job `examples-go` del CI.
+
+### Runtime de plugins (`go/plugin`, decidido 2026-09-24)
+- Dispatch **secuencial y en orden** (modelo de event loop de Stream Deck): el estado por `Invocation.Context` no necesita locks; un handler lento que necesite paralelismo lanza su goroutine.
+- Un goroutine lee y encola (buffer de 128; si se llena, se pausa la lectura) para detectar el cierre aunque un handler esté corriendo y cancelarle el ctx.
+- Cierre del daemon: `Run` devuelve `nil` si es normal (1000/1001) y error si es anormal. Los invocations en cola al cerrarse se descartan. Nunca reconecta.
+- `Invocation` es alias del tipo generado `protocol.ActionInvokedSchemaJsonData`; los errores de handler y los frames inválidos se loguean (fire-and-forget: no hay a quién reportarlos).
 
 ### Plugins externos primero
 - Diseñá la API pensando en un dev externo escribiendo su primer plugin en una tarde.

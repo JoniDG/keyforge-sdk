@@ -1,0 +1,17 @@
+{
+  "manifest_version": 1,
+  "id": "dev.jonidg.toggle",
+  "name": "Toggle",
+  "version": "0.1.0",
+  "protocol_version": "1",
+  "author": "Jonathan Daniel Gomez",
+  "description": "Example plugin: each binding keeps its own on/off state.",
+  "homepage": "https://github.com/JoniDG/keyforge-sdk/tree/main/examples/go/toggle",
+  "category": "Examples",
+  "entrypoint": {
+    "darwin": { "path": "bin/toggle-darwin" },
+    "linux": { "path": "bin/toggle-linux" },
+    "windows": { "path": "bin/toggle.exe" }
+  },
+  "actions": [{ "id": "toggle", "name": "Toggle", "inputs": ["key"], "params": [] }]
+}
