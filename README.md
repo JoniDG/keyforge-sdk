@@ -12,15 +12,38 @@ You don't need this SDK to write a plugin — any language with WebSocket and JS
 
 ## Status
 
-🚧 **Pre-alpha.** Only the Go SDK has scaffold; the protocol spec is being authored.
+🚧 **Pre-alpha.** The Go SDK can run a plugin end to end; the API may still change before v1.
 
 ## Languages
 
 | Language | Status | Path |
 |---|---|---|
-| Go | 🟡 `client` (connect + hello + events) available; plugin base in progress | [`go/`](./go/) |
+| Go | 🟡 `plugin` (run a plugin) and `client` (connect + hello + events) | [`go/`](./go/) |
 | Node.js | ⚪ Planned | [`node/`](./node/) |
 | Python | ⚪ Planned | [`python/`](./python/) |
+
+## Writing a plugin in Go
+
+```bash
+go get github.com/JoniDG/keyforge-sdk/go
+```
+
+Register one handler per action declared in your `manifest.json`; `plugin.Run` reads the launch info the daemon passes, connects, dispatches each invocation and returns when the daemon stops the plugin:
+
+```go
+err := plugin.Run(ctx, plugin.Config{
+	Version: "0.1.0", // same as manifest.json
+	Handlers: plugin.Handlers{
+		"play_pause": func(ctx context.Context, inv plugin.Invocation) error {
+			// inv.Context: binding instance, inv.Action.Params: user settings,
+			// inv.Input: hardware event (nil when fired from the app).
+			return togglePlayback()
+		},
+	},
+})
+```
+
+Handlers run one at a time, in firing order. See [`examples/go/toggle`](./examples/go/toggle/) for a complete plugin with its manifest, and [`docs/protocol.md`](./docs/protocol.md) for what happens on the wire.
 
 ## License
 
