@@ -18,7 +18,7 @@ You don't need this SDK to write a plugin — any language with WebSocket and JS
 
 | Language | Status | Path |
 |---|---|---|
-| Go | 🟡 Scaffolded, no API yet | [`go/`](./go/) |
+| Go | 🟡 `client` (connect + hello + events) available; plugin base in progress | [`go/`](./go/) |
 | Node.js | ⚪ Planned | [`node/`](./node/) |
 | Python | ⚪ Planned | [`python/`](./python/) |
 

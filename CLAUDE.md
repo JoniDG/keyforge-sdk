@@ -26,7 +26,8 @@ python/                → placeholder (TBD)
 
 ## Stack
 - Go 1.24 (subdir `go/`).
-- Tipos del protocolo: importar desde `../keyforge-protocol/dist/go/` (vía `replace` directive en local).
+- Tipos del protocolo: módulo publicado `github.com/JoniDG/keyforge-protocol/go` (tag `go/vX.Y.Z`; en `go get` va sin el prefijo: `@v0.10.0`). Nunca redefinir tipos del protocolo a mano.
+- WebSocket: `github.com/coder/websocket` (misma lib que `keyforge-core`; API con `context`, y `websocket.Accept` sirve para el server fake de los tests). Ojo: cancelar el ctx de un `Read` cierra la conexión.
 - Tests: `testify`, `mockery`.
 
 ## Comandos
