@@ -64,7 +64,9 @@ make lint
 
 ### Runtime de plugins (`go/plugin`, decidido 2026-09-24)
 - Dispatch **secuencial y en orden** (modelo de event loop de Stream Deck): el estado por `Invocation.Context` no necesita locks; un handler lento que necesite paralelismo lanza su goroutine.
-- Un goroutine lee y encola (buffer de 128; si se llena, se pausa la lectura) para detectar el cierre aunque un handler esté corriendo y cancelarle el ctx.
+- Un goroutine lee y encola (buffer de 128) para detectar el cierre aunque un handler esté corriendo y cancelarle el ctx.
+- **Cola llena → se descarta** la invocación nueva con un `Warn` (decidido 2026-09-28). No se pausa la lectura: core escribe con `writeTimeout` de 2s y cierra la conexión si vence, y como no reinicia plugins, pausar terminaría matando el plugin. Core además ya descarta del lado del daemon (`ErrPluginQueueFull`), así que es coherente con fire-and-forget.
+- **Panics en handlers se recuperan** en `dispatch` (decidido 2026-09-28): se loguean con stack y el plugin sigue, igual que `net/http` con cada request. Motivo: core no reinicia plugins caídos. Los panics en goroutines que lance el handler no se pueden recuperar y siguen matando el proceso.
 - Cierre del daemon: `Run` devuelve `nil` si es normal (1000/1001) y error si es anormal. Los invocations en cola al cerrarse se descartan. Nunca reconecta.
 - `Invocation` es alias del tipo generado `protocol.ActionInvokedSchemaJsonData`; los errores de handler y los frames inválidos se loguean (fire-and-forget: no hay a quién reportarlos).
 

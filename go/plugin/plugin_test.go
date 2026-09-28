@@ -243,6 +243,66 @@ func TestRun_CancelsRunningHandlerWhenDaemonCloses(t *testing.T) {
 	assert.False(t, ranAfter, "invocations queued after the connection closed must not run")
 }
 
+func TestRun_RecoversHandlerPanic(t *testing.T) {
+	t.Parallel()
+
+	done := make(chan struct{})
+	info := fakeDaemon(t, func(ctx context.Context, conn *websocket.Conn) {
+		acceptHello(ctx, t, conn)
+		send(ctx, t, conn, invoked("ctx-1", "boom", ""))
+		send(ctx, t, conn, invoked("ctx-2", "ok", ""))
+		waitFor(ctx, done)
+		assert.NoError(t, conn.Close(websocket.StatusNormalClosure, ""))
+	})
+
+	cfg, logs := testConfig(Handlers{
+		"boom": func(context.Context, Invocation) error {
+			panic("boom")
+		},
+		"ok": func(context.Context, Invocation) error {
+			close(done)
+			return nil
+		},
+	})
+
+	require.NoError(t, run(testContext(t), cfg, env(info)))
+	out := logs.String()
+	assert.Contains(t, out, `msg="action panicked" plugin=dev.jonidg.test action=boom context=ctx-1 panic=boom stack=`)
+	assert.Contains(t, out, "TestRun_RecoversHandlerPanic", "the stack must point at the panicking handler")
+}
+
+func TestRun_DropsInvocationsWhenQueueIsFull(t *testing.T) {
+	t.Parallel()
+
+	const dropped = 3
+	started := make(chan struct{})
+	info := fakeDaemon(t, func(ctx context.Context, conn *websocket.Conn) {
+		acceptHello(ctx, t, conn)
+		send(ctx, t, conn, invoked("running", "block", ""))
+		waitFor(ctx, started)
+		for i := range queueSize + dropped {
+			send(ctx, t, conn, invoked(fmt.Sprintf("queued-%d", i), "block", ""))
+		}
+		assert.NoError(t, conn.Close(websocket.StatusNormalClosure, ""))
+	})
+
+	// Only the first invocation runs: it blocks until the connection closes,
+	// which is noticed only if reading didn't pause on the full queue.
+	var handlerErr error
+	cfg, logs := testConfig(Handlers{"block": func(ctx context.Context, _ Invocation) error {
+		close(started)
+		<-ctx.Done()
+		handlerErr = ctx.Err()
+		return nil
+	}})
+
+	require.NoError(t, run(testContext(t), cfg, env(info)))
+	require.ErrorIs(t, handlerErr, context.Canceled)
+	out := logs.String()
+	assert.Equal(t, dropped, strings.Count(out, `msg="dropping action_invoked: handlers are not keeping up"`))
+	assert.Contains(t, out, fmt.Sprintf("action=block context=queued-%d", queueSize+dropped-1))
+}
+
 func TestRun_AbnormalClosureIsAnError(t *testing.T) {
 	t.Parallel()
 

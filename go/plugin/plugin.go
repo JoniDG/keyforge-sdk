@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime/debug"
 
 	"github.com/JoniDG/keyforge-protocol/go/protocol"
 	"github.com/JoniDG/keyforge-sdk/go/client"
@@ -17,7 +18,9 @@ import (
 const LaunchInfoEnv = "KEYFORGE_PLUGIN_INFO"
 
 // queueSize bounds how many invocations wait while a handler runs. When it
-// fills up, reading pauses until the handler catches up.
+// fills up, new invocations are dropped: pausing the read instead would stall
+// the daemon's writes until it closes the connection, and the daemon doesn't
+// restart plugins.
 const queueSize = 128
 
 // Invocation is one firing of a plugin action: Context identifies the binding
@@ -28,10 +31,10 @@ const queueSize = 128
 type Invocation = protocol.ActionInvokedSchemaJsonData
 
 // Handler runs an action. Its ctx is cancelled when the connection to the
-// daemon closes, as long as fewer than 128 invocations are waiting behind it:
-// past that, reading pauses until handlers catch up, so a closed connection
-// is only noticed then. A returned error is logged; the daemon doesn't wait
-// for the result.
+// daemon closes. A returned error is logged; the daemon doesn't wait for the
+// result. A panic is recovered and logged with its stack, and the plugin goes
+// on with the next invocation; panics in goroutines the handler starts are
+// not recovered and crash the plugin.
 type Handler func(ctx context.Context, inv Invocation) error
 
 // Handlers maps an action id, as declared in the manifest (e.g. "play_pause",
@@ -109,7 +112,7 @@ func serve(parent context.Context, conn *client.Conn, handlers Handlers, logger 
 	go func() {
 		defer close(queue)
 		defer cancel()
-		readErr = read(ctx, conn, queue, logger)
+		readErr = read(conn, queue, logger)
 	}()
 
 	// Cancelling a blocked read would drop the connection without a close
@@ -136,11 +139,11 @@ func serve(parent context.Context, conn *client.Conn, handlers Handlers, logger 
 }
 
 // read queues action_invoked events until the connection is gone, and
-// returns the error that ended it. ctx only stops a pending enqueue; reads end
-// when the connection closes.
-func read(ctx context.Context, conn *client.Conn, queue chan<- Invocation, logger *slog.Logger) error {
+// returns the error that ended it. It never blocks on a full queue (it drops
+// the invocation instead), so a closed connection is always noticed.
+func read(conn *client.Conn, queue chan<- Invocation, logger *slog.Logger) error {
 	for {
-		ev, err := conn.ReadEvent(context.WithoutCancel(ctx))
+		ev, err := conn.ReadEvent(context.Background())
 		if errors.Is(err, client.ErrInvalidFrame) {
 			logger.Warn("ignoring invalid frame", "error", err)
 			continue
@@ -159,8 +162,8 @@ func read(ctx context.Context, conn *client.Conn, queue chan<- Invocation, logge
 		}
 		select {
 		case queue <- inv:
-		case <-ctx.Done():
-			return ctx.Err()
+		default:
+			logger.Warn("dropping action_invoked: handlers are not keeping up", "action", inv.Action.Id, "context", inv.Context)
 		}
 	}
 }
@@ -171,6 +174,11 @@ func dispatch(ctx context.Context, handlers Handlers, inv Invocation, logger *sl
 		logger.Warn("no handler for action", "action", inv.Action.Id)
 		return
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("action panicked", "action", inv.Action.Id, "context", inv.Context, "panic", r, "stack", string(debug.Stack()))
+		}
+	}()
 	if err := handler(ctx, inv); err != nil {
 		logger.Error("action failed", "action", inv.Action.Id, "context", inv.Context, "error", err)
 	}
