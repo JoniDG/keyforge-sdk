@@ -1,0 +1,17 @@
+{
+  "manifest_version": 1,
+  "id": "dev.jonidg.echo",
+  "name": "Echo",
+  "version": "0.1.0",
+  "protocol_version": "1",
+  "author": "Jonathan Daniel Gomez",
+  "description": "Example plugin: logs the input and binding context of every key bound to it.",
+  "homepage": "https://github.com/JoniDG/keyforge-sdk/tree/main/examples/go/echo",
+  "category": "Examples",
+  "entrypoint": {
+    "darwin": { "path": "bin/echo-darwin" },
+    "linux": { "path": "bin/echo-linux" },
+    "windows": { "path": "bin/echo.exe" }
+  },
+  "actions": [{ "id": "echo", "name": "Echo", "inputs": ["key"], "params": [] }]
+}
