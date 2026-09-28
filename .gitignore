@@ -2,6 +2,7 @@
 go/bin/
 go/coverage.out
 go/coverage.html
+examples/go/*/bin/
 
 # Node (future)
 node/node_modules/
