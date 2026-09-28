@@ -10,5 +10,7 @@
 // Handlers run one at a time, in the order the daemon fired them, so state
 // kept per Invocation.Context (e.g. a toggle bound to two keys) needs no
 // locking. A handler that needs to do slow work should start its own
-// goroutine.
+// goroutine: up to 128 invocations wait behind a running handler, and any
+// that arrive past that are dropped and logged. A handler that panics is
+// logged and skipped; the plugin keeps running.
 package plugin
