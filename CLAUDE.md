@@ -29,6 +29,7 @@ python/                → placeholder (TBD)
 - Tipos del protocolo: módulo publicado `github.com/JoniDG/keyforge-protocol/go` (tag `go/vX.Y.Z`; en `go get` va sin el prefijo: `@v0.10.0`). Nunca redefinir tipos del protocolo a mano.
 - WebSocket: `github.com/coder/websocket` (misma lib que `keyforge-core`; API con `context`, y `websocket.Accept` sirve para el server fake de los tests). Ojo: cancelar el ctx de un `Read` **bloqueado** corta la conexión sin close frame (el peer ve un cierre anormal); con un ctx ya cancelado de entrada, en cambio, no la cierra. Por eso `plugin` lee con `context.WithoutCancel` y, al cancelar, cierra con `conn.Close()` (close 1000).
 - Tests: `testify`, `mockery`.
+- Lint: `golangci-lint`, siempre la **última release** (decisión del owner): CI usa `version: latest` y `make lint` compara la instalada con la última de GitHub (sin red avisa y corre igual). Los examples no tienen Makefile ni `.golangci.yml` propios: comparten `go/.golangci.yml` (decidido 2026-09-29), local vía `make lint-examples` y en CI vía `--config`. Un salto de versión mayor (v3) puede romper CI hasta migrar `.golangci.yml` y, probablemente, subir también `golangci-lint-action`.
 
 ## Comandos
 
@@ -36,7 +37,9 @@ Para el SDK Go:
 ```bash
 cd go
 make test
-make lint
+make lint           # falla si la instalada no es la última release (la que usa CI)
+make lint-examples  # lintea examples/go/* con go/.golangci.yml
+make lint-install   # instala la última release de golangci-lint en $(go env GOPATH)/bin
 ```
 
 ## Reglas duras

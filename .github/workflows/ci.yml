@@ -60,9 +60,11 @@ jobs:
         run: go vet ./...
       - name: Test
         run: go test -race ./...
+      # Always the latest release; `make lint-examples` fails locally when the installed
+      # one falls behind it, so both run the same version.
       - uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.1
+          version: latest
           working-directory: ./examples/go/${{ matrix.example }}
           args: --config ../../../go/.golangci.yml
 
@@ -76,7 +78,9 @@ jobs:
           go-version: '1.24'
           cache: true
           cache-dependency-path: ./go/go.sum
+      # Always the latest release; `make lint` fails locally when the installed
+      # one falls behind it, so both run the same version.
       - uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.1
+          version: latest
           working-directory: ./go
