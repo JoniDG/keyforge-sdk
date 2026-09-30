@@ -1,0 +1,28 @@
+{
+  "manifest_version": 1,
+  "id": "dev.jonidg.spotify",
+  "name": "Spotify",
+  "version": "0.1.0",
+  "protocol_version": "1",
+  "author": "Jonathan Daniel Gomez",
+  "description": "Example plugin: control Spotify playback and volume through the Spotify Web API (requires Spotify Premium).",
+  "homepage": "https://github.com/JoniDG/keyforge-sdk/tree/main/examples/go/spotify",
+  "category": "Audio",
+  "entrypoint": {
+    "darwin": { "path": "bin/spotify-darwin" },
+    "linux": { "path": "bin/spotify-linux" },
+    "windows": { "path": "bin/spotify.exe" }
+  },
+  "actions": [
+    { "id": "play_pause", "name": "Play / Pause", "inputs": ["key", "encoder"], "params": [] },
+    { "id": "next", "name": "Next Track", "inputs": ["key", "encoder"], "params": [] },
+    { "id": "previous", "name": "Previous Track", "inputs": ["key", "encoder"], "params": [] },
+    {
+      "id": "volume",
+      "name": "Volume",
+      "description": "Turn right to raise, left to lower, press to mute or unmute. Bind it to all three triggers of the encoder.",
+      "inputs": ["encoder"],
+      "params": [{ "name": "step", "label": "Step (%)", "type": "string", "required": false, "placeholder": "5" }]
+    }
+  ]
+}
