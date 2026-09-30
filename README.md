@@ -43,7 +43,7 @@ err := plugin.Run(ctx, plugin.Config{
 })
 ```
 
-Handlers run one at a time, in firing order. See [`examples/go/toggle`](./examples/go/toggle/) for a complete plugin with its manifest, [`examples/go/echo`](./examples/go/echo/) for how to try a plugin by hand against the daemon, and [`docs/protocol.md`](./docs/protocol.md) for what happens on the wire.
+Handlers run one at a time, in firing order. See [`examples/go/toggle`](./examples/go/toggle/) for a complete plugin with its manifest, [`examples/go/echo`](./examples/go/echo/) for how to try a plugin by hand against the daemon, [`examples/go/spotify`](./examples/go/spotify/) for a real-world plugin (OAuth credentials, work outside the handler), and [`docs/protocol.md`](./docs/protocol.md) for what happens on the wire.
 
 ## License
 
