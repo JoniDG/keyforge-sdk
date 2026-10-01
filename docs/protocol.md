@@ -60,4 +60,4 @@ A plugin connection may only call `hello` and only receives its own `action_invo
 
 ## Packaging
 
-A plugin ships as a `.keyforgeplugin` file: a zip with `manifest.json` at its root plus every file the manifest references. See the [manifest reference](https://github.com/JoniDG/keyforge-protocol#plugin-manifest-and-package-format) and the example in [`examples/go/toggle`](../examples/go/toggle/).
+A plugin ships as a `.keyforgeplugin` file: a zip with `manifest.json` at its root plus every file the manifest references. See the [manifest reference](https://github.com/JoniDG/keyforge-protocol#plugin-manifest-and-package-format) and the example in [`examples/go/toggle`](../examples/go/toggle/). For a step-by-step walkthrough with the Go SDK, see the [plugin author tutorial](./tutorial-go.md).
