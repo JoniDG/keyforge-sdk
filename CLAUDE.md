@@ -15,7 +15,7 @@ Toolkit para devs que quieren escribir **plugins** o **clientes externos** del d
 
 ## Layout
 ```
-docs/                  → vista del protocolo para autores de plugins (resume keyforge-protocol)
+docs/                  → vista del protocolo para autores de plugins (resume keyforge-protocol) + tutorial Go (tutorial-go.md)
 examples/go/<nombre>/  → plugins de ejemplo; cada uno es un módulo Go propio (go.mod con replace a ../../../go) + manifest.json
 go/                    → SDK Go (ACTIVO)
   client/              → Dial (hello) + ReadEvent + Close
@@ -82,6 +82,7 @@ make lint-install   # instala la última release de golangci-lint en $(go env GO
 
 - Para cualquier cambio en el helper de WebSocket, consultar Context7 sobre la lib elegida.
 - Cada feature nueva del SDK requiere ejemplo en `examples/` que la demuestre.
+- `docs/tutorial-go.md` construye paso a paso `examples/go/counter`: si cambia uno, se actualiza el otro en el mismo PR (los fragmentos finales del tutorial, incluidos los tests del paso 7, son copia textual del ejemplo, que CI testea; los de pasos intermedios son versiones previas del mismo código).
 - Antes de agregar `node/` o `python/`: revisar el SDK Go y replicar la misma forma. Consistencia > novedad por lenguaje.
 
 ## Referencias

@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: [toggle, echo, spotify]
+        example: [toggle, echo, spotify, counter]
     defaults:
       run:
         working-directory: ./examples/go/${{ matrix.example }}

@@ -39,7 +39,7 @@ Only `manifest.json` and `bin/` are needed; the Go sources are ignored.
 
 **3. (Re)start keyforged.** It discovers plugins at startup, launches `echo` and prefixes the plugin's log lines with `[dev.jonidg.echo]` in its own output.
 
-**4. Bind a key to `plugin.dev.jonidg.echo.echo`.** Until the app can pick plugin actions, send `set_binding` yourself with [websocat](https://github.com/vi/websocat) and [jq](https://jqlang.org) (`brew install websocat jq`), using the port and token the daemon writes to `runtime.json`:
+**4. Bind a key to `plugin.dev.jonidg.echo.echo`.** The app lists it as the **Echo** action; to skip the app as well, send `set_binding` yourself with [websocat](https://github.com/vi/websocat) and [jq](https://jqlang.org) (`brew install websocat jq`), using the port and token the daemon writes to `runtime.json`:
 
 ```bash
 PORT=$(jq -r .port "$CONFIG/runtime.json")

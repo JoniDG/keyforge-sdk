@@ -24,6 +24,8 @@ You don't need this SDK to write a plugin — any language with WebSocket and JS
 
 ## Writing a plugin in Go
 
+New to KeyForge plugins? Start with the tutorial: [Your first KeyForge plugin in 30 minutes](./docs/tutorial-go.md).
+
 ```bash
 go get github.com/JoniDG/keyforge-sdk/go
 ```
@@ -43,7 +45,7 @@ err := plugin.Run(ctx, plugin.Config{
 })
 ```
 
-Handlers run one at a time, in firing order. See [`examples/go/toggle`](./examples/go/toggle/) for a complete plugin with its manifest, [`examples/go/echo`](./examples/go/echo/) for how to try a plugin by hand against the daemon, [`examples/go/spotify`](./examples/go/spotify/) for a real-world plugin (OAuth credentials, work outside the handler), and [`docs/protocol.md`](./docs/protocol.md) for what happens on the wire.
+Handlers run one at a time, in firing order. See [`examples/go/counter`](./examples/go/counter/) for the plugin the tutorial builds, [`examples/go/toggle`](./examples/go/toggle/) for a minimal one, [`examples/go/echo`](./examples/go/echo/) for how to try a plugin by hand against the daemon, [`examples/go/spotify`](./examples/go/spotify/) for a real-world plugin (OAuth credentials, work outside the handler), and [`docs/protocol.md`](./docs/protocol.md) for what happens on the wire.
 
 ## License
 
