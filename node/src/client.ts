@@ -260,24 +260,24 @@ function checkHello(hello: HelloParams): void {
 
 function opened(ws: WebSocket, wsUrl: string, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
-    let reason = 'connection failed';
     const cleanup = (): void => {
       ws.removeEventListener('open', onOpen);
       ws.removeEventListener('error', onError);
-      ws.removeEventListener('close', onClose);
       signal?.removeEventListener('abort', onAbort);
     };
     const onOpen = (): void => {
       cleanup();
       resolve();
     };
+    // An error before open always means the connection failed. Waiting for
+    // the close that should follow would hang on Node 22, whose WebSocket
+    // never fires it here.
     const onError = (ev: Event): void => {
-      if ('message' in ev && isString(ev.message) && ev.message !== '') {
-        reason = ev.message;
-      }
-    };
-    const onClose = (): void => {
       cleanup();
+      const reason =
+        'message' in ev && isString(ev.message) && ev.message !== ''
+          ? ev.message
+          : 'connection failed';
       reject(dialError(wsUrl, reason));
     };
     const onAbort = (): void => {
@@ -286,7 +286,6 @@ function opened(ws: WebSocket, wsUrl: string, signal?: AbortSignal): Promise<voi
     };
     ws.addEventListener('open', onOpen);
     ws.addEventListener('error', onError);
-    ws.addEventListener('close', onClose);
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 }
