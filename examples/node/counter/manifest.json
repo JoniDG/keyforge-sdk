@@ -1,0 +1,40 @@
+{
+  "manifest_version": 1,
+  "id": "dev.jonidg.counter-node",
+  "name": "Counter (Node.js)",
+  "version": "0.1.0",
+  "protocol_version": "1",
+  "author": "Jonathan Daniel Gomez",
+  "description": "Node.js port of the counter example plugin: a counter for streams that can write its value to a text file.",
+  "homepage": "https://github.com/JoniDG/keyforge-sdk/tree/main/examples/node/counter",
+  "category": "Examples",
+  "entrypoint": {
+    "darwin": { "path": "node", "args": ["dist/main.js"] },
+    "linux": { "path": "node", "args": ["dist/main.js"] },
+    "windows": { "path": "node", "args": ["dist/main.js"] }
+  },
+  "actions": [
+    {
+      "id": "count",
+      "name": "Count",
+      "description": "A key adds one. On an encoder, turn right to add, left to subtract, press to reset.",
+      "inputs": ["key", "encoder"],
+      "params": [
+        {
+          "name": "label",
+          "label": "Label",
+          "type": "string",
+          "required": false,
+          "placeholder": "Deaths"
+        },
+        {
+          "name": "file",
+          "label": "Write to file",
+          "type": "string",
+          "required": false,
+          "placeholder": "/Users/me/obs/deaths.txt"
+        }
+      ]
+    }
+  ]
+}

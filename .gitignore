@@ -4,9 +4,12 @@ go/coverage.out
 go/coverage.html
 examples/go/*/bin/
 
-# Node (future)
+# Node
 node/node_modules/
 node/dist/
+node/coverage/
+examples/node/*/node_modules/
+examples/node/*/dist/
 
 # Python (future)
 python/.venv/

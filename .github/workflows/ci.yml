@@ -84,3 +84,79 @@ jobs:
         with:
           version: latest
           working-directory: ./go
+
+  test-node:
+    name: Test (Node SDK)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./node
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: ./node/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+      # The coverage gate (≥95%) is enforced by the thresholds in vitest.config.ts.
+      - name: Run tests
+        run: npm test
+
+  lint-node:
+    name: Lint (Node SDK and examples)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./node
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: ./node/package-lock.json
+      - run: npm ci
+      - name: Lint SDK
+        run: npm run lint
+      # The examples share the SDK's ESLint and Prettier config.
+      - name: Lint examples
+        run: npm run lint:examples
+
+  examples-node:
+    name: Examples (Node, ${{ matrix.example }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [counter]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            ./node/package-lock.json
+            ./examples/node/${{ matrix.example }}/package-lock.json
+      # The examples depend on the SDK through file:../../../node, which
+      # resolves to its build output.
+      - name: Build SDK
+        working-directory: ./node
+        run: npm ci && npm run build
+      - name: Install
+        working-directory: ./examples/node/${{ matrix.example }}
+        run: npm ci
+      - name: Typecheck
+        working-directory: ./examples/node/${{ matrix.example }}
+        run: npm run typecheck
+      - name: Test
+        working-directory: ./examples/node/${{ matrix.example }}
+        run: npm test
+      - name: Build
+        working-directory: ./examples/node/${{ matrix.example }}
+        run: npm run build
