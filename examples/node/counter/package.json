@@ -1,0 +1,25 @@
+{
+  "name": "keyforge-example-counter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Example KeyForge plugin in Node.js: a counter for streams that can write its value to a text file.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=22.4"
+  },
+  "dependencies": {
+    "@jdg-keyforge/protocol": "0.13.0",
+    "@jdg-keyforge/sdk": "file:../../../node"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  }
+}

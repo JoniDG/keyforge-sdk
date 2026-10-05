@@ -5,8 +5,8 @@ Toolkit para devs que quieren escribir **plugins** o **clientes externos** del d
 
 ## Scope
 - Documentación completa del protocolo WebSocket: handshake, mensajes, eventos del lifecycle de plugins.
-- Helpers en Go (`go/`) — único lenguaje activo en esta fase.
-- Slots reservados para Node (`node/`) y Python (`python/`) — placeholders por ahora.
+- Helpers en Go (`go/`) y Node (`node/`, paquete npm `@jdg-keyforge/sdk`), con la misma semántica.
+- Slot reservado para Python (`python/`) — placeholder por ahora.
 - Manifiesto de plugin (`manifest.json`) — formato y validador.
 
 **Fuera de scope:**
@@ -17,10 +17,13 @@ Toolkit para devs que quieren escribir **plugins** o **clientes externos** del d
 ```
 docs/                  → vista del protocolo para autores de plugins (resume keyforge-protocol) + tutorial Go (tutorial-go.md)
 examples/go/<nombre>/  → plugins de ejemplo; cada uno es un módulo Go propio (go.mod con replace a ../../../go) + manifest.json
+examples/node/<nombre>/ → plugins de ejemplo en Node; cada uno es un paquete npm propio (dependencia file:../../../node) + manifest.json
 go/                    → SDK Go (ACTIVO)
   client/              → Dial (hello) + ReadEvent + Close
   plugin/              → Run: env var, conexión, dispatch y shutdown; el autor solo escribe Handlers
-node/                  → placeholder (TBD)
+node/                  → SDK Node (TS estricto → ESM en dist/; subpaths ./client y ./plugin, mismos paquetes que Go)
+  src/guards.ts        → validación en runtime de los frames que consume el SDK (interno)
+  src/testing.ts       → daemon falso con `ws` para los tests (fuera del build y del coverage)
 python/                → placeholder (TBD)
 ```
 
@@ -29,9 +32,27 @@ python/                → placeholder (TBD)
 - Tipos del protocolo: módulo publicado `github.com/JoniDG/keyforge-protocol/go` (tag `go/vX.Y.Z`; en `go get` va sin el prefijo: `@v0.10.0`). Nunca redefinir tipos del protocolo a mano.
 - WebSocket: `github.com/coder/websocket` (misma lib que `keyforge-core`; API con `context`, y `websocket.Accept` sirve para el server fake de los tests). Ojo: cancelar el ctx de un `Read` **bloqueado** corta la conexión sin close frame (el peer ve un cierre anormal); con un ctx ya cancelado de entrada, en cambio, no la cierra. Por eso `plugin` lee con `context.WithoutCancel` y, al cancelar, cierra con `conn.Close()` (close 1000).
 - Tests: `testify`, `mockery`.
+- **Node** (`node/`, decidido 2026-10-05): Node ≥22.4, TS estricto, sin dependencias en runtime.
+  - WebSocket **nativo** de Node (global `WebSocket`); `ws` solo como devDep para el daemon falso de los tests.
+  - `@jdg-keyforge/protocol` solo trae tipos, así que los frames se validan con **guards a mano** (`src/guards.ts` + `isInvocation` en `plugin.ts`) que cubren lo que el SDK lee, no el schema completo.
+  - **Límite de 32 KiB por frame** para igualar a Go (que lo hereda de `coder/websocket`): el WebSocket nativo no permite fijarlo, así que se chequea al recibir y se cierra con **4009** (espejo de 1009 en el rango privado: el `close()` nativo solo acepta 1000 y 3000–4999). No protege memoria (el frame ya llegó), pero el peer es el daemon local.
+  - `Conn.close()` espera el close frame del daemon como máximo **5 s** (igual que `coder/websocket`); después deja de esperar, pero el WebSocket nativo no puede soltar el socket, así que un plugin que termina ahí llama a `process.exit` (ver `examples/node/counter/src/main.ts`). Abortar el `signal` de `run` aborta en el acto el `signal` del handler en curso y descarta la cola, como cancelar el ctx en Go.
+  - Diferencias de forma con Go: `AbortSignal` en lugar de `context`; abortar un `readEvent` rechaza con el `reason` y **no** cierra la conexión; un handler que tira o rechaza equivale al panic recuperado de Go. Los miembros `@internal` (`runWithEnv`, `Conn.send`/`nextFrame`) quedan fuera del `.d.ts` por `stripInternal`.
+  - Tests: Vitest con coverage v8 (umbral 95% en líneas, statements, funciones y branches). Lint: ESLint (typescript-eslint strict + stylistic) + Prettier, mismo config que `keyforge-desktop`; los examples de `examples/node/*` comparten el de `node/` vía `npm run lint:examples`.
+  - Publish a npm: lo corre el owner, con tag `node/vX.Y.Z`.
 - Lint: `golangci-lint`, siempre la **última release** (decisión del owner): CI usa `version: latest` y `make lint` compara la instalada con la última de GitHub (sin red avisa y corre igual). Los examples no tienen Makefile ni `.golangci.yml` propios: comparten `go/.golangci.yml` (decidido 2026-09-29), local vía `make lint-examples` y en CI vía `--config`. Un salto de versión mayor (v3) puede romper CI hasta migrar `.golangci.yml` y, probablemente, subir también `golangci-lint-action`.
 
 ## Comandos
+
+Para el SDK Node:
+```bash
+cd node
+npm ci
+npm test               # vitest + coverage (gate 95%)
+npm run lint           # ESLint + Prettier
+npm run lint:examples  # lintea examples/node/* con el config de node/
+npm run build          # dist/ (los examples lo necesitan: dependen de file:../../../node)
+```
 
 Para el SDK Go:
 ```bash
