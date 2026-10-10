@@ -5,14 +5,13 @@
 `keyforge-sdk` is a polyglot toolkit for writing **plugins** and **external clients** that talk to the KeyForge daemon. It contains:
 
 - A language-neutral **protocol specification** (in [`docs/`](./docs/)).
-- Convenience helpers in **Go** and **Node.js**, with the same behavior.
-- A reserved slot for a **Python** SDK (coming later).
+- Convenience helpers in **Go**, **Node.js** and **Python**, with the same behavior.
 
 You don't need this SDK to write a plugin — any language with WebSocket and JSON support works. The SDK just makes it less repetitive.
 
 ## Status
 
-🚧 **Pre-alpha.** The Go and Node.js SDKs can run a plugin end to end; the API may still change before v1.
+🚧 **Pre-alpha.** The Go, Node.js and Python SDKs can run a plugin end to end; the API may still change before v1.
 
 ## Languages
 
@@ -20,7 +19,7 @@ You don't need this SDK to write a plugin — any language with WebSocket and JS
 |---|---|---|
 | Go | 🟡 `plugin` (run a plugin) and `client` (connect + hello + events) | [`go/`](./go/) |
 | Node.js | 🟡 `plugin` and `client`, same as Go (npm: `@jdg-keyforge/sdk`) | [`node/`](./node/) |
-| Python | ⚪ Planned | [`python/`](./python/) |
+| Python | 🟡 `plugin` and `client`, same as Go (PyPI: `jdg-keyforge-sdk`) | [`python/`](./python/) |
 
 ## Writing a plugin in Go
 
@@ -65,6 +64,27 @@ await run({
 ```
 
 Same model as Go: handlers run one at a time, in firing order. See [`node/`](./node/) for the details and packaging, and [`examples/node/counter`](./examples/node/counter/) for the counter plugin ported to Node.
+
+## Writing a plugin in Python
+
+```bash
+pip install jdg-keyforge-sdk   # or: uv add jdg-keyforge-sdk
+```
+
+```python
+import asyncio
+
+from keyforge_sdk.plugin import Invocation, run
+
+
+async def play_pause(inv: Invocation) -> None:
+    await toggle_playback()
+
+
+asyncio.run(run(version="0.1.0", handlers={"play_pause": play_pause}))  # same version as manifest.json
+```
+
+Same model as Go: handlers run one at a time, in firing order. See [`python/`](./python/) for the details and packaging (a plugin ships its dependencies in a `vendor/` folder), and [`examples/python/counter`](./examples/python/counter/) for the counter plugin ported to Python.
 
 ## License
 

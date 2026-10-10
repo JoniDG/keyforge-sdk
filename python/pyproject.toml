@@ -1,0 +1,85 @@
+[project]
+name = "jdg-keyforge-sdk"
+version = "0.1.0"
+description = "Python SDK for KeyForge plugins and clients: connect to the daemon, perform the hello handshake and dispatch plugin actions."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Jonathan Daniel Gomez", email = "jonathan.d.gomez98@gmail.com" }
+]
+keywords = ["keyforge", "plugin", "sdk", "websocket", "macropad"]
+classifiers = [
+    "Framework :: AsyncIO",
+    "Programming Language :: Python :: 3",
+    "Typing :: Typed",
+]
+requires-python = ">=3.15"
+dependencies = [
+    "jdg-keyforge-protocol>=0.16.1,<0.17",
+    "websockets>=17.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/JoniDG/keyforge-sdk/tree/main/python"
+Repository = "https://github.com/JoniDG/keyforge-sdk"
+Issues = "https://github.com/JoniDG/keyforge-sdk/issues"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "keyforge_sdk"
+
+[tool.uv]
+# The examples install the SDK by path (not editable); rebuild it for them
+# when the sources change, not only when pyproject.toml does.
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.py" }]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--cov=keyforge_sdk --cov-branch --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.coverage.report]
+fail_under = 95
+
+# Shared by examples/python/* (through `extend` in theirs, or --config).
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "I", "B", "UP", "N", "S", "ANN", "ASYNC", "BLE", "C4", "PT",
+    "RET", "SIM", "PL", "RUF", "TRY", "PERF", "D",
+]
+ignore = [
+    "D203",  # conflicts with D211
+    "D213",  # conflicts with D212
+    "TRY003",  # messages carry the scope, like the Go SDK's errors
+    "PLR2004",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "D", "PLR0913"]
+"**/test_*.py" = ["S101", "D", "PLR0913"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+strict = true
+# `Any` is banned across KeyForge, like interface{}/any in Go.
+disallow_any_explicit = true
+disallow_any_expr = false
+warn_unreachable = true

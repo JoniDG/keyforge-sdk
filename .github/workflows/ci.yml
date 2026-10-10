@@ -160,3 +160,75 @@ jobs:
       - name: Build
         working-directory: ./examples/node/${{ matrix.example }}
         run: npm run build
+
+  test-python:
+    name: Test (Python SDK)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python
+    steps:
+      - uses: actions/checkout@v4
+      # uv installs the Python in python/.python-version (always the latest).
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: python/uv.lock
+      - run: uv sync --locked
+      # The coverage gate (≥95%) is enforced by fail_under in pyproject.toml.
+      - name: Run tests
+        run: uv run pytest
+      - name: Build
+        run: uv build
+
+  lint-python:
+    name: Lint (Python SDK)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: python/uv.lock
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy src tests
+
+  examples-python:
+    name: Examples (Python, ${{ matrix.example }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [counter]
+    defaults:
+      run:
+        working-directory: ./examples/python/${{ matrix.example }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: examples/python/${{ matrix.example }}/uv.lock
+      - run: uv sync --locked
+      - name: Test
+        run: uv run pytest
+      # The examples share the SDK's ruff config through `extend`.
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy .
+      # Packages the plugin the way python/README.md describes and runs it
+      # outside the venv: it must find every dependency in vendor/ and stop
+      # because it wasn't launched by the daemon.
+      - name: Vendor and run
+        run: |
+          uv export --no-dev --no-emit-project --no-hashes --frozen | uv pip install --target vendor -r -
+          out=$("$(uv python find --system 3.15)" main.py 2>&1) && exit 1
+          echo "$out"
+          grep -q 'KEYFORGE_PLUGIN_INFO is not set' <<<"$out"

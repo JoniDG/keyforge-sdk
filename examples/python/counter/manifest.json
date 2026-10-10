@@ -1,0 +1,40 @@
+{
+  "manifest_version": 1,
+  "id": "dev.jonidg.counter-python",
+  "name": "Counter (Python)",
+  "version": "0.1.0",
+  "protocol_version": "1",
+  "author": "Jonathan Daniel Gomez",
+  "description": "Python port of the counter example plugin: a counter for streams that can write its value to a text file.",
+  "homepage": "https://github.com/JoniDG/keyforge-sdk/tree/main/examples/python/counter",
+  "category": "Examples",
+  "entrypoint": {
+    "darwin": { "path": "python3.15", "args": ["main.py"] },
+    "linux": { "path": "python3.15", "args": ["main.py"] },
+    "windows": { "path": "py", "args": ["-3.15", "main.py"] }
+  },
+  "actions": [
+    {
+      "id": "count",
+      "name": "Count",
+      "description": "A key adds one. On an encoder, turn right to add, left to subtract, press to reset.",
+      "inputs": ["key", "encoder"],
+      "params": [
+        {
+          "name": "label",
+          "label": "Label",
+          "type": "string",
+          "required": false,
+          "placeholder": "Deaths"
+        },
+        {
+          "name": "file",
+          "label": "Write to file",
+          "type": "string",
+          "required": false,
+          "placeholder": "/Users/me/obs/deaths.txt"
+        }
+      ]
+    }
+  ]
+}
