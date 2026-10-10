@@ -1,0 +1,36 @@
+[project]
+name = "keyforge-counter-plugin"
+version = "0.1.0"
+description = "Python port of the counter example plugin for KeyForge."
+requires-python = ">=3.15"
+dependencies = ["jdg-keyforge-sdk"]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.17.0",
+]
+
+[tool.uv]
+# A plugin folder, not a package to publish.
+package = false
+
+[tool.uv.sources]
+# Not editable: `uv export` must hand the SDK to `uv pip install --target`
+# as a regular package (see python/README.md).
+jdg-keyforge-sdk = { path = "../../../python" }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.ruff]
+extend = "../../../python/pyproject.toml"
+extend-exclude = ["vendor"]
+
+[tool.mypy]
+strict = true
+disallow_any_explicit = true
+warn_unreachable = true
+exclude = ["^vendor/"]

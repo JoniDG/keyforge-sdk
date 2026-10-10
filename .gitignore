@@ -11,11 +11,16 @@ node/coverage/
 examples/node/*/node_modules/
 examples/node/*/dist/
 
-# Python (future)
+# Python
 python/.venv/
 python/dist/
-python/__pycache__/
-python/*.egg-info/
+python/.coverage
+examples/python/*/.venv/
+examples/python/*/vendor/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Env
 .env
