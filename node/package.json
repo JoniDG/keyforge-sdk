@@ -1,6 +1,6 @@
 {
   "name": "@jdg-keyforge/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Node.js SDK for KeyForge plugins and clients: connect to the daemon, perform the hello handshake and dispatch plugin actions.",
   "keywords": [
     "keyforge",
