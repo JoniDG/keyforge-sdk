@@ -3,7 +3,7 @@ module github.com/JoniDG/keyforge-sdk/go
 go 1.24
 
 require (
-	github.com/JoniDG/keyforge-protocol/go v0.10.0
+	github.com/JoniDG/keyforge-protocol/go v0.16.1
 	github.com/coder/websocket v1.8.14
 	github.com/stretchr/testify v1.12.1
 )

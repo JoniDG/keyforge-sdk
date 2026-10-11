@@ -54,7 +54,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@jdg-keyforge/protocol": "0.13.0"
+    "@jdg-keyforge/protocol": "0.16.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

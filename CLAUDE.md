@@ -36,7 +36,7 @@ python/                → SDK Python (asyncio; módulos keyforge_sdk.client y k
 ## Stack
 
 - Go 1.24 (subdir `go/`).
-- Tipos del protocolo: módulo publicado `github.com/JoniDG/keyforge-protocol/go` (tag `go/vX.Y.Z`; en `go get` va sin el prefijo: `@v0.10.0`). Nunca redefinir tipos del protocolo a mano.
+- Tipos del protocolo: módulo publicado `github.com/JoniDG/keyforge-protocol/go` (tag `go/vX.Y.Z`; en `go get` va sin el prefijo: `@v0.16.1`). Nunca redefinir tipos del protocolo a mano.
 - WebSocket: `github.com/coder/websocket` (misma lib que `keyforge-core`; API con `context`, y `websocket.Accept` sirve para el server fake de los tests). Ojo: cancelar el ctx de un `Read` **bloqueado** corta la conexión sin close frame (el peer ve un cierre anormal); con un ctx ya cancelado de entrada, en cambio, no la cierra. Por eso `plugin` lee con `context.WithoutCancel` y, al cancelar, cierra con `conn.Close()` (close 1000).
 - Tests: `testify`, `mockery`.
 - **Node** (`node/`, decidido 2026-10-05): Node ≥22.4, TS estricto, sin dependencias en runtime.
