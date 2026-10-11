@@ -14,7 +14,7 @@
     "node": ">=22.4"
   },
   "dependencies": {
-    "@jdg-keyforge/protocol": "0.13.0",
+    "@jdg-keyforge/protocol": "0.16.1",
     "@jdg-keyforge/sdk": "file:../../../node"
   },
   "devDependencies": {

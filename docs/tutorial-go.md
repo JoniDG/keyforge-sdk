@@ -42,7 +42,14 @@ Every plugin has a `manifest.json` at its root. It tells KeyForge who the plugin
     "linux": { "path": "bin/counter-linux" },
     "windows": { "path": "bin/counter.exe" }
   },
-  "actions": [{ "id": "count", "name": "Count", "inputs": ["key", "encoder"], "params": [] }]
+  "actions": [
+    {
+      "id": "count",
+      "name": "Count",
+      "inputs": ["key", "encoder"],
+      "params": []
+    }
+  ]
 }
 ```
 
@@ -175,7 +182,7 @@ Let users name each counter and, optionally, write it to a file. Declare the par
 ]
 ```
 
-Params are always strings for now. Their values arrive in `inv.Action.Params`, a map holding only the params the user filled in, so read them with a fallback:
+This plugin only uses `string` params; a param's `type` can also be `boolean` (a JSON bool, absent means false), `color` (a `#RRGGBB` string) or `input` (the id of an input of the device). Their values arrive in `inv.Action.Params`, a map holding only the params the user filled in, so read them with a fallback:
 
 ```go
 // param returns a string param of the binding, or "" when it is not set.
@@ -216,7 +223,7 @@ if file := param(inv, "file"); file != "" {
 return nil
 ```
 
-Rebuild, reinstall, set **Write to file** on a binding and add a *Text (read from file)* source in OBS pointing to the same file.
+Rebuild, reinstall, set **Write to file** on a binding and add a _Text (read from file)_ source in OBS pointing to the same file.
 
 ## 6. Encoders
 
@@ -321,13 +328,13 @@ They go in `main_test.go`, in `package main`, and import `encoding/json`, `log/s
 
 ## 8. When something goes wrong
 
-| Symptom | Likely cause |
-|---|---|
-| The app refuses the package | `manifest.json` isn't at the root of the zip, a required field is missing, or there's no `entrypoint` for your OS. |
-| Installed, but the plugin never starts | The entrypoint path doesn't match the built binary (name, or a missing `bin/`), or the file isn't executable. |
-| Starts, then exits right away | Look at `keyforged`'s output for its error. A panic in a goroutine you started kills the plugin; panics inside handlers are recovered and logged. |
-| Pressing the key does nothing | The binding points at another action, or the handler failed: look for `action failed` in the logs, with your error. |
-| `no handler for action` in the logs | The action id in the manifest and the key in `plugin.Handlers` differ. The manifest test from step 7 catches this. |
+| Symptom                                | Likely cause                                                                                                                                      |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The app refuses the package            | `manifest.json` isn't at the root of the zip, a required field is missing, or there's no `entrypoint` for your OS.                                |
+| Installed, but the plugin never starts | The entrypoint path doesn't match the built binary (name, or a missing `bin/`), or the file isn't executable.                                     |
+| Starts, then exits right away          | Look at `keyforged`'s output for its error. A panic in a goroutine you started kills the plugin; panics inside handlers are recovered and logged. |
+| Pressing the key does nothing          | The binding points at another action, or the handler failed: look for `action failed` in the logs, with your error.                               |
+| `no handler for action` in the logs    | The action id in the manifest and the key in `plugin.Handlers` differ. The manifest test from step 7 catches this.                                |
 
 ## Where to go next
 

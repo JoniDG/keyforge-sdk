@@ -1,5 +1,5 @@
-github.com/JoniDG/keyforge-protocol/go v0.10.0 h1:RanQV8yYAgAgJv+vz8UXCpeB6JAw9+GyFebR+OFUgFU=
-github.com/JoniDG/keyforge-protocol/go v0.10.0/go.mod h1:HFiMBW3IAGjvXo91kFtlthnPUrOOJ93UKdrZB9dpOF0=
+github.com/JoniDG/keyforge-protocol/go v0.16.1 h1:fOpufoWndQhHeXoYfqaoQsWn36PRznG8cFxCNk/QLuk=
+github.com/JoniDG/keyforge-protocol/go v0.16.1/go.mod h1:HFiMBW3IAGjvXo91kFtlthnPUrOOJ93UKdrZB9dpOF0=
 github.com/coder/websocket v1.8.14 h1:9L0p0iKiNOibykf283eHkKUHHrpG7f65OE3BhhO7v9g=
 github.com/coder/websocket v1.8.14/go.mod h1:NX3SzP+inril6yawo5CQXx8+fk145lPDC6pumgx0mVg=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=

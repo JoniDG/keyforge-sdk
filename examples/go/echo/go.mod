@@ -5,7 +5,7 @@ go 1.24
 replace github.com/JoniDG/keyforge-sdk/go => ../../../go
 
 require (
-	github.com/JoniDG/keyforge-protocol/go v0.10.0
+	github.com/JoniDG/keyforge-protocol/go v0.16.1
 	github.com/JoniDG/keyforge-sdk/go v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.12.1
 )
